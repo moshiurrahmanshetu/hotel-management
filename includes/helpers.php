@@ -11,8 +11,8 @@ if (!defined('APP_ROOT')) {
     define('APP_ROOT', dirname(__DIR__));
 }
 
-// Load configuration
-require_once APP_ROOT . '/config/config.php';
+// Note: This file should be loaded by bootstrap.php which loads config.php
+// Do NOT load bootstrap here to avoid circular dependency
 
 /**
  * Get database connection instance
@@ -268,27 +268,6 @@ function truncate($string, $length = 100, $suffix = '...') {
  */
 function randomString($length = 32) {
     return bin2hex(random_bytes($length / 2));
-}
-
-/**
- * Hash password
- * 
- * @param string $password Plain text password
- * @return string Hashed password
- */
-function hashPassword($password) {
-    return password_hash($password, PASSWORD_DEFAULT, ['cost' => 12]);
-}
-
-/**
- * Verify password
- * 
- * @param string $password Plain text password
- * @param string $hash Hashed password
- * @return bool
- */
-function verifyPassword($password, $hash) {
-    return password_verify($password, $hash);
 }
 
 /**
@@ -615,14 +594,38 @@ function all() {
 }
 
 /**
- * Get request input
+ * Get request input with sanitization
  * 
  * @param string $key Input key
  * @param mixed $default Default value
+ * @param string $type Expected type (string, int, float, bool, email, url, phone, filename)
  * @return mixed Input value
  */
-function input($key, $default = null) {
-    return $_REQUEST[$key] ?? $default;
+function input($key, $default = null, $type = 'string') {
+    $value = $_REQUEST[$key] ?? $default;
+    
+    if ($value === null) {
+        return $default;
+    }
+    
+    switch ($type) {
+        case 'int':
+            return sanitizeInt($value) ?? $default;
+        case 'float':
+            return sanitizeFloat($value) ?? $default;
+        case 'bool':
+            return sanitizeBool($value);
+        case 'email':
+            return sanitizeEmail($value) ?? $default;
+        case 'url':
+            return sanitizeUrl($value) ?? $default;
+        case 'phone':
+            return sanitizePhone($value);
+        case 'filename':
+            return sanitizeFilename($value);
+        default:
+            return sanitizeString($value);
+    }
 }
 
 /**
@@ -633,7 +636,40 @@ function input($key, $default = null) {
  * @return mixed Old input value
  */
 function old($key, $default = null) {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
     return $_SESSION['_old_input'][$key] ?? $default;
+}
+
+/**
+ * Clean old input from session
+ * 
+ * @return void
+ */
+function clearOldInput() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    unset($_SESSION['_old_input']);
+}
+
+/**
+ * Flash old input to session
+ * 
+ * @param array $data Data to flash
+ * @return void
+ */
+function flashOldInput(array $data = null) {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    
+    if ($data === null) {
+        $_SESSION['_old_input'] = $_POST;
+    } else {
+        $_SESSION['_old_input'] = $data;
+    }
 }
 
 /**
@@ -850,4 +886,26 @@ function renderCustomField($field, $value = '') {
     }
     
     return $html;
+}
+
+/**
+ * Format file size
+ * 
+ * @param int $bytes File size in bytes
+ * @return string Formatted file size
+ */
+function formatFileSize($bytes) {
+    if ($bytes >= 1073741824) {
+        return number_format($bytes / 1073741824, 2) . ' GB';
+    } elseif ($bytes >= 1048576) {
+        return number_format($bytes / 1048576, 2) . ' MB';
+    } elseif ($bytes >= 1024) {
+        return number_format($bytes / 1024, 2) . ' KB';
+    } elseif ($bytes > 1) {
+        return $bytes . ' bytes';
+    } elseif ($bytes == 1) {
+        return '1 byte';
+    } else {
+        return '0 bytes';
+    }
 }

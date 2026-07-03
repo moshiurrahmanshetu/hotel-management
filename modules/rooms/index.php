@@ -9,8 +9,8 @@ if (!defined('APP_ROOT')) {
     define('APP_ROOT', dirname(dirname(dirname(__FILE__))));
 }
 
-// Load configuration and authentication
-require_once APP_ROOT . '/config/config.php';
+// Load bootstrap (includes config, installer check, etc.)
+require_once APP_ROOT . '/includes/bootstrap.php';
 require_once APP_ROOT . '/includes/auth.php';
 
 // Require authentication
@@ -342,6 +342,9 @@ $statusColors = [
                                                     <div class="table-actions">
                                                         <a href="<?php echo APP_URL; ?>/modules/rooms/view.php?id=<?php echo $room['id']; ?>" class="table-action-btn" title="View">
                                                             <i class="bi bi-eye"></i>
+                                                        </a>
+                                                        <a href="<?php echo APP_URL; ?>/modules/rooms/gallery.php?room_id=<?php echo $room['id']; ?>" class="table-action-btn" title="Gallery">
+                                                            <i class="bi bi-images"></i>
                                                         </a>
                                                         <a href="<?php echo APP_URL; ?>/modules/rooms/edit.php?id=<?php echo $room['id']; ?>" class="table-action-btn" title="Edit">
                                                             <i class="bi bi-pencil"></i>

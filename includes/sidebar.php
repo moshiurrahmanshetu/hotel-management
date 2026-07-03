@@ -11,7 +11,8 @@ if (!defined('APP_ROOT')) {
     define('APP_ROOT', dirname(__DIR__));
 }
 
-// Load authentication
+// Load bootstrap (includes config, installer check, etc.)
+require_once APP_ROOT . '/includes/bootstrap.php';
 require_once APP_ROOT . '/includes/auth.php';
 
 // Get current user
@@ -139,6 +140,28 @@ $userRole = $currentUser && !empty($currentUser['roles']) ? ucfirst(str_replace(
                     <i class="bi bi-door-open"></i>
                     <span>Rooms</span>
                 </a>
+            </li>
+            
+            <li class="nav-item has-submenu">
+                <a class="nav-link submenu-toggle" href="javascript:void(0)">
+                    <i class="bi bi-currency-dollar"></i>
+                    <span>Room Rates</span>
+                    <i class="bi bi-chevron-down submenu-arrow"></i>
+                </a>
+                <ul class="nav submenu">
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo APP_URL; ?>/modules/room-rates/index.php" data-page="room-rates">
+                            <i class="bi bi-grid"></i>
+                            <span>Room Rates</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo APP_URL; ?>/modules/room-rates/plans.php" data-page="rate-plans">
+                            <i class="bi bi-tags"></i>
+                            <span>Rate Plans</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
             
             <li class="nav-item has-submenu">

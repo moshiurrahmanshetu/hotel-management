@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Hotel & Resort Management System
  * Header Include File
@@ -11,8 +12,10 @@ if (!defined('APP_ROOT')) {
     define('APP_ROOT', dirname(__DIR__));
 }
 
-// Load configuration
-require_once APP_ROOT . '/config/config.php';
+// Load bootstrap if not already loaded (ensures config is available)
+if (!defined('APP_NAME')) {
+    require_once APP_ROOT . '/includes/bootstrap.php';
+}
 
 $page_title = isset($page_title) ? $page_title : APP_NAME;
 $page_description = isset($page_description) ? $page_description : APP_NAME;

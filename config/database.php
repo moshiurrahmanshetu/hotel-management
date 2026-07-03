@@ -17,10 +17,11 @@ require_once APP_ROOT . '/config/config.php';
 /**
  * Database Configuration
  */
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'hotel_management');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_HOST', env('DB_HOST', 'localhost'));
+define('DB_PORT', env('DB_PORT', '3306'));
+define('DB_NAME', env('DB_DATABASE', 'hotel_management'));
+define('DB_USER', env('DB_USERNAME', 'root'));
+define('DB_PASS', env('DB_PASSWORD', ''));
 define('DB_CHARSET', 'utf8mb4');
 define('DB_COLLATION', 'utf8mb4_unicode_ci');
 
@@ -48,13 +49,13 @@ class Database {
      */
     private function __construct() {
         try {
-            $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
+            $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
             $this->connection = new PDO($dsn, DB_USER, DB_PASS, DB_OPTIONS);
         } catch (PDOException $e) {
             if (DEBUG_MODE) {
                 die("Database Connection Error: " . $e->getMessage());
             } else {
-                die("Database connection failed. Please contact system administrator.");
+                die("Database connection failed. Please check your configuration and ensure the database server is running.");
             }
         }
     }
@@ -425,5 +426,30 @@ function delete($table, $where, $params = []) {
             error_log("Database delete error: " . $e->getMessage());
             return false;
         }
+    }
+}
+
+/**
+ * Verify database connection
+ * 
+ * @return array Result with success flag and message
+ */
+function verifyDatabaseConnection() {
+    try {
+        $db = Database::getInstance()->getConnection();
+        
+        // Test connection with a simple query
+        $stmt = $db->query("SELECT 1");
+        $stmt->fetch();
+        
+        return [
+            'success' => true,
+            'message' => 'Database connection successful'
+        ];
+    } catch (PDOException $e) {
+        return [
+            'success' => false,
+            'message' => 'Database connection failed: ' . $e->getMessage()
+        ];
     }
 }

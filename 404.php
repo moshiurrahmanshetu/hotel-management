@@ -9,8 +9,8 @@ if (!defined('APP_ROOT')) {
     define('APP_ROOT', dirname(__FILE__));
 }
 
-// Load configuration
-require_once APP_ROOT . '/config/config.php';
+// Load bootstrap (includes config, installer check, etc.)
+require_once APP_ROOT . '/includes/bootstrap.php';
 
 $page_title = '404 - Page Not Found';
 $page_description = 'The page you are looking for does not exist';

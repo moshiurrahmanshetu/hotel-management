@@ -11,11 +11,8 @@ if (!defined('APP_ROOT')) {
     define('APP_ROOT', dirname(__DIR__));
 }
 
-// Load configuration and helpers
-require_once APP_ROOT . '/config/config.php';
-require_once APP_ROOT . '/config/database.php';
-require_once APP_ROOT . '/includes/helpers.php';
-require_once APP_ROOT . '/includes/security.php';
+// Note: helpers.php and security.php are loaded by config.php which is loaded by bootstrap.php
+// This file should be loaded after bootstrap.php
 
 /**
  * Start secure session

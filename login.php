@@ -4,13 +4,18 @@
  * Login Page
  */
 
+// Enable error reporting for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Prevent direct access
 if (!defined('APP_ROOT')) {
     define('APP_ROOT', dirname(__FILE__));
 }
 
-// Load configuration and authentication
-require_once APP_ROOT . '/config/config.php';
+// Load bootstrap (includes config, installer check, etc.)
+require_once APP_ROOT . '/includes/bootstrap.php';
 require_once APP_ROOT . '/includes/auth.php';
 
 // Redirect if already authenticated
@@ -316,4 +321,6 @@ $page_description = 'Login to ' . APP_NAME;
     });
 </script>
 
-<?php require_once APP_ROOT . '/includes/footer.php'; ?>
+<?php
+require_once APP_ROOT . '/includes/footer.php';
+?>

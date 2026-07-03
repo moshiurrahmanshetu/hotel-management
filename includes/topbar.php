@@ -11,7 +11,8 @@ if (!defined('APP_ROOT')) {
     define('APP_ROOT', dirname(__DIR__));
 }
 
-// Load authentication
+// Load bootstrap (includes config, installer check, etc.)
+require_once APP_ROOT . '/includes/bootstrap.php';
 require_once APP_ROOT . '/includes/auth.php';
 
 // Get current user

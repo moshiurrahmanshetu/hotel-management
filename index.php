@@ -11,6 +11,9 @@ if (!defined('APP_ROOT')) {
     define('APP_ROOT', dirname(__FILE__));
 }
 
+// Load bootstrap (includes config, installer check, etc.)
+require_once APP_ROOT . '/includes/bootstrap.php';
+
 // Redirect to login page
-header('Location: ' . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/hotel-management/login.php');
+header('Location: ' . APP_URL . '/login.php');
 exit;

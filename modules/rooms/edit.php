@@ -9,8 +9,8 @@ if (!defined('APP_ROOT')) {
     define('APP_ROOT', dirname(dirname(dirname(__FILE__))));
 }
 
-// Load configuration and authentication
-require_once APP_ROOT . '/config/config.php';
+// Load bootstrap (includes config, installer check, etc.)
+require_once APP_ROOT . '/includes/bootstrap.php';
 require_once APP_ROOT . '/includes/auth.php';
 
 // Require authentication
@@ -501,6 +501,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </button>
                                 <a href="<?php echo APP_URL; ?>/modules/rooms/view.php?id=<?php echo $roomId; ?>" class="btn btn-outline-secondary">
                                     <i class="bi bi-eye me-2"></i>View Room
+                                </a>
+                                <a href="<?php echo APP_URL; ?>/modules/rooms/gallery.php?room_id=<?php echo $roomId; ?>" class="btn btn-outline-primary">
+                                    <i class="bi bi-images me-2"></i>Gallery
                                 </a>
                                 <a href="<?php echo APP_URL; ?>/modules/rooms/index.php" class="btn btn-outline-secondary">
                                     <i class="bi bi-arrow-left me-2"></i>Back to Rooms

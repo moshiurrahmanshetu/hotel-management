@@ -11,8 +11,8 @@ if (!defined('APP_ROOT')) {
     define('APP_ROOT', dirname(__DIR__));
 }
 
-// Load configuration
-require_once APP_ROOT . '/config/config.php';
+// Note: This file should be loaded by config.php which is loaded by bootstrap.php
+// Do NOT load bootstrap here to avoid circular dependency
 
 /**
  * Generate CSRF token
@@ -518,85 +518,6 @@ function validateSameOrigin() {
     return false;
 }
 
-/**
- * Sanitize user input from $_GET or $_POST
- * 
- * @param string $key Input key
- * @param mixed $default Default value
- * @param string $type Expected type (string, int, float, bool, email, url)
- * @return mixed Sanitized value or default
- */
-function input($key, $default = null, $type = 'string') {
-    $value = $_REQUEST[$key] ?? $default;
-    
-    if ($value === null) {
-        return $default;
-    }
-    
-    switch ($type) {
-        case 'int':
-            return sanitizeInt($value) ?? $default;
-        case 'float':
-            return sanitizeFloat($value) ?? $default;
-        case 'bool':
-            return sanitizeBool($value);
-        case 'email':
-            return sanitizeEmail($value) ?? $default;
-        case 'url':
-            return sanitizeUrl($value) ?? $default;
-        case 'phone':
-            return sanitizePhone($value);
-        case 'filename':
-            return sanitizeFilename($value);
-        default:
-            return sanitizeString($value);
-    }
-}
-
-/**
- * Clean old input from session
- * 
- * @return void
- */
-function clearOldInput() {
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-    unset($_SESSION['_old_input']);
-}
-
-/**
- * Flash old input to session
- * 
- * @param array $data Data to flash
- * @return void
- */
-function flashOldInput(array $data = null) {
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-    
-    if ($data === null) {
-        $_SESSION['_old_input'] = $_POST;
-    } else {
-        $_SESSION['_old_input'] = $data;
-    }
-}
-
-/**
- * Get old input value
- * 
- * @param string $key Input key
- * @param mixed $default Default value
- * @return mixed Old input value
- */
-function old($key, $default = null) {
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-    
-    return $_SESSION['_old_input'][$key] ?? $default;
-}
 
 /**
  * Security headers
