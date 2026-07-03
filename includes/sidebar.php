@@ -41,6 +41,42 @@ $userRole = $currentUser && !empty($currentUser['roles']) ? ucfirst(str_replace(
                 </a>
             </li>
             
+            <?php if (hasPermission('users.view') || hasPermission('roles.view')): ?>
+            <li class="nav-item has-submenu">
+                <a class="nav-link submenu-toggle" href="javascript:void(0)">
+                    <i class="bi bi-gear"></i>
+                    <span>Administration</span>
+                    <i class="bi bi-chevron-down submenu-arrow"></i>
+                </a>
+                <ul class="nav submenu">
+                    <?php if (hasPermission('users.view')): ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo APP_URL; ?>/modules/users/index.php" data-page="users">
+                            <i class="bi bi-people"></i>
+                            <span>Users</span>
+                        </a>
+                    </li>
+                    <?php endif; ?>
+                    <?php if (hasPermission('roles.view')): ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo APP_URL; ?>/modules/roles/index.php" data-page="roles">
+                            <i class="bi bi-shield-lock"></i>
+                            <span>Roles</span>
+                        </a>
+                    </li>
+                    <?php endif; ?>
+                    <?php if (hasPermission('roles.permissions')): ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo APP_URL; ?>/modules/permissions/index.php" data-page="permissions">
+                            <i class="bi bi-key"></i>
+                            <span>Permissions</span>
+                        </a>
+                    </li>
+                    <?php endif; ?>
+                </ul>
+            </li>
+            <?php endif; ?>
+            
             <li class="nav-item has-submenu">
                 <a class="nav-link submenu-toggle" href="javascript:void(0)">
                     <i class="bi bi-door-open"></i>
@@ -226,38 +262,14 @@ $userRole = $currentUser && !empty($currentUser['roles']) ? ucfirst(str_replace(
                 </ul>
             </li>
             
-            <li class="nav-item has-submenu">
-                <a class="nav-link submenu-toggle" href="javascript:void(0)">
+            <?php if (hasPermission('settings.edit')): ?>
+            <li class="nav-item">
+                <a class="nav-link" href="<?php echo APP_URL; ?>/modules/settings/index.php" data-page="settings">
                     <i class="bi bi-gear"></i>
                     <span>Settings</span>
-                    <i class="bi bi-chevron-down submenu-arrow"></i>
                 </a>
-                <ul class="nav submenu">
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo APP_URL; ?>/modules/settings/general.php" data-page="general-settings">
-                            <i class="bi bi-sliders"></i>
-                            <span>General</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo APP_URL; ?>/modules/settings/users.php" data-page="users">
-                            <i class="bi bi-people"></i>
-                            <span>Users</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo APP_URL; ?>/modules/settings/roles.php" data-page="roles">
-                            <i class="bi bi-shield-lock"></i>
-                            <span>Roles & Permissions</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo APP_URL; ?>/modules/settings/email.php" data-page="email-settings">
-                            <i class="bi bi-envelope"></i>
-                            <span>Email</span>
-                        </a>
-                    </li>
-                </ul>
+            </li>
+            <?php endif; ?>
             </li>
         </ul>
     </nav>
