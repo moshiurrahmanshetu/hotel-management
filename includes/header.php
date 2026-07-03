@@ -41,6 +41,7 @@ $page_description = isset($page_description) ? $page_description : APP_NAME;
     
     <!-- Custom CSS -->
     <link href="<?php echo APP_URL; ?>/assets/css/style.css" rel="stylesheet">
+    <link href="<?php echo APP_URL; ?>/assets/css/components.css" rel="stylesheet">
     
     <?php if (isset($extra_css)): ?>
         <?php echo $extra_css; ?>

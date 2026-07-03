@@ -1,7 +1,7 @@
 <?php
 /**
  * Hotel & Resort Management System
- * Login Page
+ * Forgot Password Page
  */
 
 // Prevent direct access
@@ -15,29 +15,33 @@ require_once APP_ROOT . '/includes/auth.php';
 
 // Redirect if already authenticated
 if (isAuthenticated()) {
-    redirect(getRedirectUrl());
+    redirect(APP_URL . '/dashboard.php');
 }
 
 $error = '';
 $success = '';
 
-// Handle POST login
+// Handle POST request
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate CSRF token
     if (!checkCsrfToken($_POST['_csrf_token'] ?? '')) {
         $error = 'Invalid request. Please try again.';
     } else {
         $email = sanitizeEmail($_POST['email'] ?? '');
-        $password = $_POST['password'] ?? '';
-        $remember = isset($_POST['remember']);
         
-        if (!$email || !$password) {
-            $error = 'Please enter both email and password.';
+        if (!$email) {
+            $error = 'Please enter your email address.';
         } else {
-            $result = attemptLogin($email, $password, $remember);
+            $result = createPasswordResetToken($email);
             
             if ($result['success']) {
-                redirect(getRedirectUrl());
+                $success = $result['message'];
+                // In production, the token would be sent via email
+                // For testing, we can show the reset link
+                if (isset($result['token']) && DEBUG_MODE) {
+                    $resetLink = APP_URL . '/reset-password.php?token=' . $result['token'];
+                    $success .= ' <br><small class="text-muted">Debug: <a href="' . $resetLink . '">' . $resetLink . '</a></small>';
+                }
             } else {
                 $error = $result['message'];
             }
@@ -45,8 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$page_title = 'Login';
-$page_description = 'Login to ' . APP_NAME;
+$page_title = 'Forgot Password';
+$page_description = 'Reset your password for ' . APP_NAME;
 ?>
 <?php require_once APP_ROOT . '/includes/header.php'; ?>
 
@@ -55,23 +59,23 @@ $page_description = 'Login to ' . APP_NAME;
         <div class="login-card">
             <div class="login-header">
                 <div class="login-logo">
-                    <i class="bi bi-building"></i>
+                    <i class="bi bi-key"></i>
                 </div>
-                <h1><?php echo APP_NAME; ?></h1>
-                <p class="login-subtitle">Sign in to your account</p>
+                <h1>Forgot Password?</h1>
+                <p class="login-subtitle">Enter your email to receive a password reset link</p>
             </div>
             
             <?php if ($error): ?>
                 <div class="alert alert-danger" role="alert">
                     <i class="bi bi-exclamation-triangle me-2"></i>
-                    <?php echo htmlspecialchars($error); ?>
+                    <?php echo $error; ?>
                 </div>
             <?php endif; ?>
             
             <?php if ($success): ?>
                 <div class="alert alert-success" role="alert">
                     <i class="bi bi-check-circle me-2"></i>
-                    <?php echo htmlspecialchars($success); ?>
+                    <?php echo $success; ?>
                 </div>
             <?php endif; ?>
             
@@ -89,30 +93,8 @@ $page_description = 'Login to ' . APP_NAME;
                 </div>
                 
                 <div class="form-group mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bi bi-lock"></i>
-                        </span>
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
-                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                            <i class="bi bi-eye"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="form-group mb-3">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="remember" name="remember" <?php echo isset($_POST['remember']) ? 'checked' : ''; ?>>
-                        <label class="form-check-label" for="remember">
-                            Remember me
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="form-group mb-3">
                     <button type="submit" class="btn btn-primary btn-block w-100">
-                        <span class="btn-text">Sign In</span>
+                        <span class="btn-text">Send Reset Link</span>
                         <span class="btn-loader d-none">
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                         </span>
@@ -122,22 +104,22 @@ $page_description = 'Login to ' . APP_NAME;
             
             <div class="login-footer">
                 <p class="mb-0">
-                    <a href="<?php echo APP_URL; ?>/forgot-password.php">Forgot your password?</a>
+                    <a href="<?php echo APP_URL; ?>/login.php">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Login
+                    </a>
                 </p>
             </div>
         </div>
         
         <div class="login-info">
             <div class="info-content">
-                <h2>Welcome Back!</h2>
-                <p>Manage your hotel and resort operations efficiently with our comprehensive management system.</p>
+                <h2>Password Recovery</h2>
+                <p>Enter your registered email address and we'll send you a secure link to reset your password.</p>
                 <ul class="feature-list">
-                    <li><i class="bi bi-check-circle"></i> Room Management</li>
-                    <li><i class="bi bi-check-circle"></i> Booking System</li>
-                    <li><i class="bi bi-check-circle"></i> Guest Management</li>
-                    <li><i class="bi bi-check-circle"></i> Payment Tracking</li>
-                    <li><i class="bi bi-check-circle"></i> Staff Management</li>
-                    <li><i class="bi bi-check-circle"></i> Advanced Reports</li>
+                    <li><i class="bi bi-shield-check"></i> Secure Process</li>
+                    <li><i class="bi bi-clock"></i> Link expires in 1 hour</li>
+                    <li><i class="bi bi-envelope"></i> Email verification</li>
+                    <li><i class="bi bi-lock"></i> Encrypted transmission</li>
                 </ul>
             </div>
         </div>
@@ -288,22 +270,6 @@ $page_description = 'Login to ' . APP_NAME;
 </style>
 
 <script>
-    // Toggle password visibility
-    document.getElementById('togglePassword').addEventListener('click', function() {
-        const passwordInput = document.getElementById('password');
-        const icon = this.querySelector('i');
-        
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            icon.classList.remove('bi-eye');
-            icon.classList.add('bi-eye-slash');
-        } else {
-            passwordInput.type = 'password';
-            icon.classList.remove('bi-eye-slash');
-            icon.classList.add('bi-eye');
-        }
-    });
-    
     // Form submission loading state
     document.querySelector('.login-form').addEventListener('submit', function(e) {
         const btn = this.querySelector('button[type="submit"]');

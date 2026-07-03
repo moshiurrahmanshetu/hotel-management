@@ -10,6 +10,14 @@
 if (!defined('APP_ROOT')) {
     define('APP_ROOT', dirname(__DIR__));
 }
+
+// Load authentication
+require_once APP_ROOT . '/includes/auth.php';
+
+// Get current user
+$currentUser = authUser();
+$userName = $currentUser ? ($currentUser['first_name'] . ' ' . $currentUser['last_name']) : 'Guest';
+$userEmail = $currentUser ? $currentUser['email'] : '';
 ?>
 
 <!-- Topbar -->
@@ -53,7 +61,32 @@ if (!defined('APP_ROOT')) {
                 <span class="input-group-text">
                     <i class="bi bi-search"></i>
                 </span>
-                <input type="text" class="form-control" placeholder="Search...">
+                <input type="text" class="form-control" placeholder="Search..." id="globalSearch">
+                <button class="btn btn-outline-secondary search-toggle" type="button" id="searchToggle">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Fullscreen Toggle -->
+        <div class="topbar-item">
+            <button class="topbar-btn" id="fullscreenToggle" title="Fullscreen">
+                <i class="bi bi-fullscreen"></i>
+            </button>
+        </div>
+        
+        <!-- Dark Mode Toggle -->
+        <div class="topbar-item">
+            <button class="topbar-btn" id="darkModeToggle" title="Toggle Dark Mode">
+                <i class="bi bi-moon"></i>
+            </button>
+        </div>
+        
+        <!-- Date & Time -->
+        <div class="topbar-item d-none d-lg-block">
+            <div class="datetime-display">
+                <div class="date" id="currentDate"></div>
+                <div class="time" id="currentTime"></div>
             </div>
         </div>
         
@@ -61,7 +94,7 @@ if (!defined('APP_ROOT')) {
         <div class="topbar-item dropdown">
             <button class="topbar-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
                 <i class="bi bi-bell"></i>
-                <span class="badge bg-danger">3</span>
+                <span class="badge bg-danger notification-badge">3</span>
             </button>
             <div class="dropdown-menu dropdown-menu-end notification-dropdown">
                 <div class="dropdown-header">
@@ -110,20 +143,28 @@ if (!defined('APP_ROOT')) {
         <div class="topbar-item dropdown">
             <button class="topbar-btn dropdown-toggle user-dropdown-btn" type="button" data-bs-toggle="dropdown">
                 <div class="user-avatar">
-                    <i class="bi bi-person-circle"></i>
+                    <?php if ($currentUser && $currentUser['avatar']): ?>
+                        <img src="<?php echo htmlspecialchars($currentUser['avatar']); ?>" alt="User Avatar">
+                    <?php else: ?>
+                        <i class="bi bi-person-circle"></i>
+                    <?php endif; ?>
                 </div>
-                <span class="user-name d-none d-md-inline">Admin User</span>
+                <span class="user-name d-none d-md-inline"><?php echo htmlspecialchars($userName); ?></span>
                 <i class="bi bi-chevron-down"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-end user-dropdown">
                 <div class="dropdown-header">
                     <div class="user-info">
                         <div class="user-avatar-lg">
-                            <i class="bi bi-person-circle"></i>
+                            <?php if ($currentUser && $currentUser['avatar']): ?>
+                                <img src="<?php echo htmlspecialchars($currentUser['avatar']); ?>" alt="User Avatar">
+                            <?php else: ?>
+                                <i class="bi bi-person-circle"></i>
+                            <?php endif; ?>
                         </div>
                         <div class="user-details">
-                            <div class="user-name">Admin User</div>
-                            <div class="user-email">admin@hotel.com</div>
+                            <div class="user-name"><?php echo htmlspecialchars($userName); ?></div>
+                            <div class="user-email"><?php echo htmlspecialchars($userEmail); ?></div>
                         </div>
                     </div>
                 </div>
@@ -141,7 +182,7 @@ if (!defined('APP_ROOT')) {
                     <span>Change Password</span>
                 </a>
                 <div class="dropdown-divider"></div>
-                <a href="<?php echo APP_URL; ?>/login.php?logout=true" class="dropdown-item text-danger">
+                <a href="<?php echo APP_URL; ?>/logout.php" class="dropdown-item text-danger">
                     <i class="bi bi-box-arrow-right"></i>
                     <span>Logout</span>
                 </a>

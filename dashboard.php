@@ -9,15 +9,12 @@ if (!defined('APP_ROOT')) {
     define('APP_ROOT', dirname(__FILE__));
 }
 
-// Load configuration
+// Load configuration and authentication
 require_once APP_ROOT . '/config/config.php';
+require_once APP_ROOT . '/includes/auth.php';
 
-// Check if user is logged in (placeholder - implement actual auth later)
-// session_start();
-// if (!isset($_SESSION['user_id'])) {
-//     header('Location: ' . APP_URL . '/login.php');
-//     exit;
-// }
+// Require authentication
+requireAuth();
 
 $page_title = 'Dashboard';
 $page_description = 'Welcome to ' . APP_NAME;
@@ -26,6 +23,9 @@ $page_description = 'Welcome to ' . APP_NAME;
 $breadcrumb_items = [
     ['label' => 'Dashboard', 'active' => true]
 ];
+
+// Get current user
+$currentUser = authUser();
 ?>
 <?php require_once APP_ROOT . '/includes/header.php'; ?>
 

@@ -14,7 +14,7 @@ AOS.init({
 });
 
 // ============================================
-// Sidebar Toggle
+// Sidebar Toggle & Multi-level Menu
 // ============================================
 const sidebar = document.getElementById('sidebar');
 const sidebarToggle = document.getElementById('sidebarToggle');
@@ -23,8 +23,7 @@ const sidebarOverlay = document.getElementById('sidebarOverlay');
 const mainContent = document.querySelector('.main-content');
 
 function toggleSidebar() {
-    sidebar.classList.toggle('collapsed');
-    mainContent.classList.toggle('expanded');
+    SidebarState.toggleCollapse();
 }
 
 function openSidebar() {
@@ -59,6 +58,44 @@ window.addEventListener('resize', function() {
         document.body.style.overflow = '';
     }
 });
+
+// Multi-level submenu toggle
+document.querySelectorAll('.submenu-toggle').forEach(function(toggle) {
+    toggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        const navItem = this.closest('.nav-item');
+        const submenuId = this.getAttribute('href') || navItem.dataset.submenu;
+        
+        navItem.classList.toggle('open');
+        
+        // Save state to localStorage
+        SidebarState.saveSubmenuState(submenuId, navItem.classList.contains('open'));
+    });
+});
+
+// Auto-highlight active menu item based on current page
+function setActiveNavigation() {
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll('.sidebar-nav .nav-link[data-page]');
+    
+    navLinks.forEach(function(link) {
+        const page = link.dataset.page;
+        if (currentPath.includes(page)) {
+            link.classList.add('active');
+            
+            // Open parent submenu
+            const parentSubmenu = link.closest('.submenu');
+            if (parentSubmenu) {
+                const parentNavItem = parentSubmenu.closest('.nav-item');
+                parentNavItem.classList.add('open');
+            }
+        } else {
+            link.classList.remove('active');
+        }
+    });
+}
+
+setActiveNavigation();
 
 // ============================================
 // Dropdowns
@@ -99,6 +136,8 @@ document.querySelectorAll('.dropdown-menu').forEach(function(menu) {
 // Search Box
 // ============================================
 const searchBox = document.querySelector('.search-box input');
+const searchToggle = document.getElementById('searchToggle');
+
 if (searchBox) {
     searchBox.addEventListener('keyup', function(e) {
         if (e.key === 'Enter') {
@@ -110,6 +149,43 @@ if (searchBox) {
         }
     });
 }
+
+if (searchToggle) {
+    searchToggle.addEventListener('click', function() {
+        const searchContainer = document.querySelector('.search-box');
+        if (searchContainer) {
+            searchContainer.classList.toggle('active');
+            if (!searchContainer.classList.contains('active')) {
+                searchBox.value = '';
+            }
+        }
+    });
+}
+
+// ============================================
+// Fullscreen Toggle
+// ============================================
+const fullscreenToggle = document.getElementById('fullscreenToggle');
+if (fullscreenToggle) {
+    fullscreenToggle.addEventListener('click', function() {
+        Fullscreen.toggle();
+    });
+}
+
+// ============================================
+// Dark Mode Toggle
+// ============================================
+const darkModeToggle = document.getElementById('darkModeToggle');
+if (darkModeToggle) {
+    darkModeToggle.addEventListener('click', function() {
+        DarkMode.toggle();
+    });
+}
+
+// ============================================
+// Date & Time Display
+// ============================================
+DateTime.init();
 
 // ============================================
 // Notifications
@@ -409,24 +485,6 @@ document.querySelectorAll('[data-bs-toggle="popover"]').forEach(function(popover
     new bootstrap.Popover(popover);
 });
 
-// ============================================
-// Active Navigation Highlight
-// ============================================
-function setActiveNavigation() {
-    const currentPath = window.location.pathname;
-    const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
-    
-    navLinks.forEach(function(link) {
-        const linkPath = new URL(link.href).pathname;
-        if (currentPath === linkPath) {
-            link.classList.add('active');
-        } else {
-            link.classList.remove('active');
-        }
-    });
-}
-
-setActiveNavigation();
 
 // ============================================
 // Smooth scroll for anchor links

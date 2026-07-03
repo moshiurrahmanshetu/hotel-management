@@ -17,6 +17,8 @@ DROP TABLE IF EXISTS `activity_logs`;
 DROP TABLE IF EXISTS `user_roles`;
 DROP TABLE IF EXISTS `role_permissions`;
 DROP TABLE IF EXISTS `user_sessions`;
+DROP TABLE IF EXISTS `login_attempts`;
+DROP TABLE IF EXISTS `password_resets`;
 DROP TABLE IF EXISTS `users`;
 DROP TABLE IF EXISTS `permissions`;
 DROP TABLE IF EXISTS `roles`;
@@ -285,6 +287,47 @@ CREATE TABLE `user_sessions` (
     KEY `idx_user_sessions_user_id` (`user_id`),
     KEY `idx_user_sessions_last_activity` (`last_activity`),
     CONSTRAINT `fk_user_sessions_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================
+-- Login Attempts Table
+-- ============================================
+CREATE TABLE `login_attempts` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` INT UNSIGNED NULL,
+    `email` VARCHAR(100) NOT NULL,
+    `ip_address` VARCHAR(45) NOT NULL,
+    `user_agent` VARCHAR(255) NULL,
+    `success` TINYINT(1) NOT NULL DEFAULT 0,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_login_attempts_user_id` (`user_id`),
+    KEY `idx_login_attempts_email` (`email`),
+    KEY `idx_login_attempts_ip_address` (`ip_address`),
+    KEY `idx_login_attempts_created_at` (`created_at`),
+    KEY `idx_login_attempts_success` (`success`),
+    CONSTRAINT `fk_login_attempts_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================
+-- Password Resets Table
+-- ============================================
+CREATE TABLE `password_resets` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` INT UNSIGNED NOT NULL,
+    `email` VARCHAR(100) NOT NULL,
+    `token` VARCHAR(255) NOT NULL,
+    `ip_address` VARCHAR(45) NULL,
+    `user_agent` VARCHAR(255) NULL,
+    `expires_at` TIMESTAMP NOT NULL,
+    `used_at` TIMESTAMP NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_password_resets_token` (`token`),
+    KEY `idx_password_resets_user_id` (`user_id`),
+    KEY `idx_password_resets_email` (`email`),
+    KEY `idx_password_resets_expires_at` (`expires_at`),
+    CONSTRAINT `fk_password_resets_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================

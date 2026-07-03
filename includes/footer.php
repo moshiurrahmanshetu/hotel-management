@@ -31,6 +31,7 @@ if (!defined('APP_ROOT')) {
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
 <!-- Custom JavaScript -->
+<script src="<?php echo APP_URL; ?>/assets/js/utilities.js"></script>
 <script src="<?php echo APP_URL; ?>/assets/js/main.js"></script>
 
 <?php if (isset($extra_js)): ?>

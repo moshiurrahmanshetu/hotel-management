@@ -1,7 +1,7 @@
 <?php
 /**
  * Hotel & Resort Management System
- * Login Page
+ * Reset Password Page
  */
 
 // Prevent direct access
@@ -15,29 +15,48 @@ require_once APP_ROOT . '/includes/auth.php';
 
 // Redirect if already authenticated
 if (isAuthenticated()) {
-    redirect(getRedirectUrl());
+    redirect(APP_URL . '/dashboard.php');
 }
 
 $error = '';
 $success = '';
+$token = $_GET['token'] ?? '';
 
-// Handle POST login
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// Validate token first
+$tokenValid = false;
+if ($token) {
+    $validation = validatePasswordResetToken($token);
+    $tokenValid = $validation['success'];
+    
+    if (!$tokenValid) {
+        $error = $validation['message'];
+    }
+} else {
+    $error = 'Invalid or missing reset token.';
+}
+
+// Handle POST request
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $tokenValid) {
     // Validate CSRF token
     if (!checkCsrfToken($_POST['_csrf_token'] ?? '')) {
         $error = 'Invalid request. Please try again.';
     } else {
-        $email = sanitizeEmail($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
-        $remember = isset($_POST['remember']);
+        $confirmPassword = $_POST['confirm_password'] ?? '';
         
-        if (!$email || !$password) {
-            $error = 'Please enter both email and password.';
+        if (!$password) {
+            $error = 'Please enter a new password.';
+        } elseif (strlen($password) < 8) {
+            $error = 'Password must be at least 8 characters long.';
+        } elseif ($password !== $confirmPassword) {
+            $error = 'Passwords do not match.';
         } else {
-            $result = attemptLogin($email, $password, $remember);
+            $result = resetPassword($token, $password);
             
             if ($result['success']) {
-                redirect(getRedirectUrl());
+                $success = $result['message'];
+                // Redirect to login after successful reset
+                header('refresh:3;url=' . APP_URL . '/login.php');
             } else {
                 $error = $result['message'];
             }
@@ -45,8 +64,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$page_title = 'Login';
-$page_description = 'Login to ' . APP_NAME;
+$page_title = 'Reset Password';
+$page_description = 'Reset your password for ' . APP_NAME;
 ?>
 <?php require_once APP_ROOT . '/includes/header.php'; ?>
 
@@ -55,64 +74,63 @@ $page_description = 'Login to ' . APP_NAME;
         <div class="login-card">
             <div class="login-header">
                 <div class="login-logo">
-                    <i class="bi bi-building"></i>
+                    <i class="bi bi-lock-fill"></i>
                 </div>
-                <h1><?php echo APP_NAME; ?></h1>
-                <p class="login-subtitle">Sign in to your account</p>
+                <h1>Reset Password</h1>
+                <p class="login-subtitle">Enter your new password below</p>
             </div>
             
             <?php if ($error): ?>
                 <div class="alert alert-danger" role="alert">
                     <i class="bi bi-exclamation-triangle me-2"></i>
-                    <?php echo htmlspecialchars($error); ?>
+                    <?php echo $error; ?>
                 </div>
             <?php endif; ?>
             
             <?php if ($success): ?>
                 <div class="alert alert-success" role="alert">
                     <i class="bi bi-check-circle me-2"></i>
-                    <?php echo htmlspecialchars($success); ?>
+                    <?php echo $success; ?>
                 </div>
+                <p class="text-center mt-3">
+                    <a href="<?php echo APP_URL; ?>/login.php" class="btn btn-primary">Go to Login</a>
+                </p>
             <?php endif; ?>
             
+            <?php if ($tokenValid && !$success): ?>
             <form class="login-form" action="" method="POST">
                 <?php echo csrfField(); ?>
                 
                 <div class="form-group mb-3">
-                    <label for="email" class="form-label">Email Address</label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bi bi-envelope"></i>
-                        </span>
-                        <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>">
-                    </div>
-                </div>
-                
-                <div class="form-group mb-3">
-                    <label for="password" class="form-label">Password</label>
+                    <label for="password" class="form-label">New Password</label>
                     <div class="input-group">
                         <span class="input-group-text">
                             <i class="bi bi-lock"></i>
                         </span>
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter new password" required minlength="8">
                         <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <small class="form-text text-muted">Password must be at least 8 characters long.</small>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="confirm_password" class="form-label">Confirm Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-lock-fill"></i>
+                        </span>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm new password" required minlength="8">
+                        <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
                 </div>
                 
                 <div class="form-group mb-3">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="remember" name="remember" <?php echo isset($_POST['remember']) ? 'checked' : ''; ?>>
-                        <label class="form-check-label" for="remember">
-                            Remember me
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="form-group mb-3">
                     <button type="submit" class="btn btn-primary btn-block w-100">
-                        <span class="btn-text">Sign In</span>
+                        <span class="btn-text">Reset Password</span>
                         <span class="btn-loader d-none">
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                         </span>
@@ -122,22 +140,23 @@ $page_description = 'Login to ' . APP_NAME;
             
             <div class="login-footer">
                 <p class="mb-0">
-                    <a href="<?php echo APP_URL; ?>/forgot-password.php">Forgot your password?</a>
+                    <a href="<?php echo APP_URL; ?>/login.php">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Login
+                    </a>
                 </p>
             </div>
+            <?php endif; ?>
         </div>
         
         <div class="login-info">
             <div class="info-content">
-                <h2>Welcome Back!</h2>
-                <p>Manage your hotel and resort operations efficiently with our comprehensive management system.</p>
+                <h2>Create New Password</h2>
+                <p>Choose a strong password to secure your account. Make sure it's something you haven't used before.</p>
                 <ul class="feature-list">
-                    <li><i class="bi bi-check-circle"></i> Room Management</li>
-                    <li><i class="bi bi-check-circle"></i> Booking System</li>
-                    <li><i class="bi bi-check-circle"></i> Guest Management</li>
-                    <li><i class="bi bi-check-circle"></i> Payment Tracking</li>
-                    <li><i class="bi bi-check-circle"></i> Staff Management</li>
-                    <li><i class="bi bi-check-circle"></i> Advanced Reports</li>
+                    <li><i class="bi bi-shield-check"></i> At least 8 characters</li>
+                    <li><i class="bi bi-text-uppercase"></i> Mix of uppercase & lowercase</li>
+                    <li><i class="bi bi-type-numeric"></i> Include numbers</li>
+                    <li><i class="bi bi-type"></i> Use special characters</li>
                 </ul>
             </div>
         </div>
@@ -291,6 +310,21 @@ $page_description = 'Login to ' . APP_NAME;
     // Toggle password visibility
     document.getElementById('togglePassword').addEventListener('click', function() {
         const passwordInput = document.getElementById('password');
+        const icon = this.querySelector('i');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    });
+    
+    document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+        const passwordInput = document.getElementById('confirm_password');
         const icon = this.querySelector('i');
         
         if (passwordInput.type === 'password') {
