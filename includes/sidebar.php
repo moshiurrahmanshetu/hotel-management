@@ -79,30 +79,66 @@ $userRole = $currentUser && !empty($currentUser['roles']) ? ucfirst(str_replace(
             
             <li class="nav-item has-submenu">
                 <a class="nav-link submenu-toggle" href="javascript:void(0)">
-                    <i class="bi bi-door-open"></i>
-                    <span>Rooms</span>
+                    <i class="bi bi-building"></i>
+                    <span>Hotel Structure</span>
                     <i class="bi bi-chevron-down submenu-arrow"></i>
                 </a>
                 <ul class="nav submenu">
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo APP_URL; ?>/modules/rooms/index.php" data-page="rooms">
-                            <i class="bi bi-grid"></i>
-                            <span>All Rooms</span>
+                        <a class="nav-link" href="<?php echo APP_URL; ?>/modules/properties/index.php" data-page="properties">
+                            <i class="bi bi-building"></i>
+                            <span>Properties</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo APP_URL; ?>/modules/rooms/types.php" data-page="room-types">
-                            <i class="bi bi-tags"></i>
-                            <span>Room Types</span>
+                        <a class="nav-link" href="<?php echo APP_URL; ?>/modules/buildings/index.php" data-page="buildings">
+                            <i class="bi bi-building"></i>
+                            <span>Buildings</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo APP_URL; ?>/modules/rooms/facilities.php" data-page="room-facilities">
-                            <i class="bi bi-list-check"></i>
-                            <span>Facilities</span>
+                        <a class="nav-link" href="<?php echo APP_URL; ?>/modules/floors/index.php" data-page="floors">
+                            <i class="bi bi-layers"></i>
+                            <span>Floors</span>
                         </a>
                     </li>
                 </ul>
+            </li>
+            
+            <li class="nav-item has-submenu">
+                <a class="nav-link submenu-toggle" href="javascript:void(0)">
+                    <i class="bi bi-database"></i>
+                    <span>Master Data</span>
+                    <i class="bi bi-chevron-down submenu-arrow"></i>
+                </a>
+                <ul class="nav submenu">
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo APP_URL; ?>/modules/master-data/index.php" data-page="master-groups">
+                            <i class="bi bi-folder"></i>
+                            <span>Groups</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo APP_URL; ?>/modules/master-data/items.php" data-page="master-items">
+                            <i class="bi bi-list-ul"></i>
+                            <span>Items</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link" href="<?php echo APP_URL; ?>/modules/custom-fields/index.php" data-page="custom-fields">
+                    <i class="bi bi-input-cursor-text"></i>
+                    <span>Custom Fields</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link" href="<?php echo APP_URL; ?>/modules/rooms/index.php" data-page="rooms">
+                    <i class="bi bi-door-open"></i>
+                    <span>Rooms</span>
+                </a>
             </li>
             
             <li class="nav-item has-submenu">

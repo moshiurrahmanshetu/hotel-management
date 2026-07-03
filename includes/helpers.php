@@ -739,3 +739,115 @@ function version() {
 function appName() {
     return APP_NAME;
 }
+
+/**
+ * Render custom field input
+ * 
+ * @param array $field Custom field data
+ * @param mixed $value Current value (optional)
+ * @return string HTML input
+ */
+function renderCustomField($field, $value = '') {
+    $fieldName = 'custom_field_' . $field['id'];
+    $fieldId = 'custom_field_' . $field['id'];
+    $required = $field['is_required'] ? 'required' : '';
+    $placeholder = $field['placeholder'] ? 'placeholder="' . htmlspecialchars($field['placeholder']) . '"' : '';
+    $defaultValue = $value !== '' ? $value : ($field['default_value'] ?? '');
+    
+    $html = '';
+    
+    switch ($field['field_type']) {
+        case 'text':
+            $html = '<input type="text" class="form-control" id="' . $fieldId . '" name="' . $fieldName . '" ' . $required . ' ' . $placeholder . ' value="' . htmlspecialchars($defaultValue) . '">';
+            break;
+            
+        case 'number':
+            $html = '<input type="number" class="form-control" id="' . $fieldId . '" name="' . $fieldName . '" ' . $required . ' ' . $placeholder . ' value="' . htmlspecialchars($defaultValue) . '">';
+            break;
+            
+        case 'email':
+            $html = '<input type="email" class="form-control" id="' . $fieldId . '" name="' . $fieldName . '" ' . $required . ' ' . $placeholder . ' value="' . htmlspecialchars($defaultValue) . '">';
+            break;
+            
+        case 'phone':
+            $html = '<input type="tel" class="form-control" id="' . $fieldId . '" name="' . $fieldName . '" ' . $required . ' ' . $placeholder . ' value="' . htmlspecialchars($defaultValue) . '">';
+            break;
+            
+        case 'textarea':
+            $html = '<textarea class="form-control" id="' . $fieldId . '" name="' . $fieldName . '" ' . $required . ' ' . $placeholder . ' rows="3">' . htmlspecialchars($defaultValue) . '</textarea>';
+            break;
+            
+        case 'select':
+            $options = json_decode($field['options'], true) ?: [];
+            $html = '<select class="form-select" id="' . $fieldId . '" name="' . $fieldName . '" ' . $required . '>';
+            $html .= '<option value="">Select Option</option>';
+            foreach ($options as $key => $label) {
+                $selected = $defaultValue == $key ? 'selected' : '';
+                $html .= '<option value="' . htmlspecialchars($key) . '" ' . $selected . '>' . htmlspecialchars($label) . '</option>';
+            }
+            $html .= '</select>';
+            break;
+            
+        case 'multi_select':
+            $options = json_decode($field['options'], true) ?: [];
+            $selectedValues = is_array($defaultValue) ? $defaultValue : (json_decode($defaultValue, true) ?: []);
+            $html = '<select class="form-select" id="' . $fieldId . '" name="' . $fieldName . '[]" multiple>';
+            foreach ($options as $key => $label) {
+                $selected = in_array($key, $selectedValues) ? 'selected' : '';
+                $html .= '<option value="' . htmlspecialchars($key) . '" ' . $selected . '>' . htmlspecialchars($label) . '</option>';
+            }
+            $html .= '</select>';
+            break;
+            
+        case 'checkbox':
+            $checked = $defaultValue ? 'checked' : '';
+            $html = '<div class="form-check">';
+            $html .= '<input class="form-check-input" type="checkbox" id="' . $fieldId . '" name="' . $fieldName . '" value="1" ' . $checked . '>';
+            $html .= '<label class="form-check-label" for="' . $fieldId . '">Yes</label>';
+            $html .= '</div>';
+            break;
+            
+        case 'radio':
+            $options = json_decode($field['options'], true) ?: [];
+            $html = '<div>';
+            foreach ($options as $key => $label) {
+                $checked = $defaultValue == $key ? 'checked' : '';
+                $html .= '<div class="form-check form-check-inline">';
+                $html .= '<input class="form-check-input" type="radio" id="' . $fieldId . '_' . $key . '" name="' . $fieldName . '" value="' . htmlspecialchars($key) . '" ' . $checked . '>';
+                $html .= '<label class="form-check-label" for="' . $fieldId . '_' . $key . '">' . htmlspecialchars($label) . '</label>';
+                $html .= '</div>';
+            }
+            $html .= '</div>';
+            break;
+            
+        case 'date':
+            $html = '<input type="date" class="form-control" id="' . $fieldId . '" name="' . $fieldName . '" ' . $required . ' value="' . htmlspecialchars($defaultValue) . '">';
+            break;
+            
+        case 'time':
+            $html = '<input type="time" class="form-control" id="' . $fieldId . '" name="' . $fieldName . '" ' . $required . ' value="' . htmlspecialchars($defaultValue) . '">';
+            break;
+            
+        case 'datetime':
+            $html = '<input type="datetime-local" class="form-control" id="' . $fieldId . '" name="' . $fieldName . '" ' . $required . ' value="' . htmlspecialchars($defaultValue) . '">';
+            break;
+            
+        case 'file':
+            $html = '<input type="file" class="form-control" id="' . $fieldId . '" name="' . $fieldName . '" ' . $required . '>';
+            break;
+            
+        case 'image':
+            $html = '<input type="file" class="form-control" id="' . $fieldId . '" name="' . $fieldName . '" accept="image/*" ' . $required . '>';
+            break;
+            
+        case 'url':
+            $html = '<input type="url" class="form-control" id="' . $fieldId . '" name="' . $fieldName . '" ' . $required . ' ' . $placeholder . ' value="' . htmlspecialchars($defaultValue) . '">';
+            break;
+            
+        default:
+            $html = '<input type="text" class="form-control" id="' . $fieldId . '" name="' . $fieldName . '" ' . $required . ' ' . $placeholder . ' value="' . htmlspecialchars($defaultValue) . '">';
+            break;
+    }
+    
+    return $html;
+}
