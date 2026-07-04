@@ -473,7 +473,9 @@
 .image-preview.active {
     display: block;
 }
-
+ img {
+    max-width: 100%;
+}
 .image-preview img {
     width: 100%;
     height: 100%;

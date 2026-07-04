@@ -184,6 +184,12 @@ a:hover {
     flex: 1;
     padding: 20px 0;
     overflow-y: auto;
+    scrollbar-width: none;
+     -ms-overflow-style: none;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+    display: none;
 }
 
 .sidebar-nav .nav {
@@ -301,6 +307,7 @@ a:hover {
     justify-content: center;
     color: var(--white);
     font-size: 1.5rem;
+    overflow: hidden;
 }
 
 .user-info {
@@ -665,6 +672,7 @@ a:hover {
     justify-content: center;
     color: var(--white);
     font-size: 1.75rem;
+    overflow: hidden;
 }
 
 .user-dropdown .user-details {

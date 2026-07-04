@@ -8,6 +8,69 @@
 // ============================================
 // LOCAL STORAGE MANAGER
 // ============================================
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const btn = document.querySelector(".user-dropdown-btn");
+    const menu = document.querySelector(".user-dropdown");
+
+    if (!btn || !menu) return;
+
+    // শুরুতে hide
+    menu.style.display = "none";
+
+    btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (menu.style.display === "none") {
+            menu.style.display = "block";
+        } else {
+            menu.style.display = "none";
+        }
+    });
+
+    // বাইরে ক্লিক করলে বন্ধ হবে
+    document.addEventListener("click", function () {
+        menu.style.display = "none";
+    });
+
+    // dropdown-এর ভিতরে ক্লিক করলে বন্ধ হবে না
+    menu.addEventListener("click", function (e) {
+        e.stopPropagation();
+    });
+
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const btn = document.querySelector(".notification-btn");
+    const menu = document.querySelector(".notification-dropdown");
+
+    if (!btn || !menu) return;
+
+    menu.style.display = "none";
+
+    btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        menu.style.display =
+            (menu.style.display === "none" || menu.style.display === "")
+                ? "block"
+                : "none";
+    });
+
+    menu.addEventListener("click", function (e) {
+        e.stopPropagation();
+    });
+
+    document.addEventListener("click", function () {
+        menu.style.display = "none";
+    });
+
+});
+
 const Storage = {
     /**
      * Set item in localStorage

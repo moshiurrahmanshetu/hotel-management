@@ -93,7 +93,7 @@ $userEmail = $currentUser ? $currentUser['email'] : '';
         
         <!-- Notifications -->
         <div class="topbar-item dropdown">
-            <button class="topbar-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <button class="topbar-btn dropdown-toggle" type="button">
                 <i class="bi bi-bell"></i>
                 <span class="badge bg-danger notification-badge">3</span>
             </button>
@@ -142,7 +142,7 @@ $userEmail = $currentUser ? $currentUser['email'] : '';
         
         <!-- User Profile -->
         <div class="topbar-item dropdown">
-            <button class="topbar-btn dropdown-toggle user-dropdown-btn" type="button" data-bs-toggle="dropdown">
+            <button class="topbar-btn dropdown-toggle user-dropdown-btn" type="button">
                 <div class="user-avatar">
                     <?php if ($currentUser && $currentUser['avatar']): ?>
                         <img src="<?php echo htmlspecialchars($currentUser['avatar']); ?>" alt="User Avatar">
@@ -151,7 +151,7 @@ $userEmail = $currentUser ? $currentUser['email'] : '';
                     <?php endif; ?>
                 </div>
                 <span class="user-name d-none d-md-inline"><?php echo htmlspecialchars($userName); ?></span>
-                <i class="bi bi-chevron-down"></i>
+                
             </button>
             <div class="dropdown-menu dropdown-menu-end user-dropdown">
                 <div class="dropdown-header">
@@ -170,15 +170,11 @@ $userEmail = $currentUser ? $currentUser['email'] : '';
                     </div>
                 </div>
                 <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item">
+                <a href="<?php echo APP_URL; ?>/profile.php" class="dropdown-item">
                     <i class="bi bi-person"></i>
                     <span>My Profile</span>
                 </a>
-                <a href="#" class="dropdown-item">
-                    <i class="bi bi-gear"></i>
-                    <span>Settings</span>
-                </a>
-                <a href="#" class="dropdown-item">
+                <a href="<?php echo APP_URL; ?>/change-password.php" class="dropdown-item">
                     <i class="bi bi-shield-lock"></i>
                     <span>Change Password</span>
                 </a>
@@ -191,3 +187,4 @@ $userEmail = $currentUser ? $currentUser['email'] : '';
         </div>
     </div>
 </header>
+
