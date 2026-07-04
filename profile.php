@@ -173,6 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if ($result) {
                             // Update session
                             $_SESSION['user_avatar'] = $avatarPath;
+                            $_SESSION['user_avatar_updated'] = time();
                             
                             // Log activity
                             logActivity('avatar_changed', 'auth', 'User changed avatar', ['old_avatar' => $user['avatar']], ['new_avatar' => $avatarPath]);
@@ -206,6 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($result) {
                     // Update session
                     $_SESSION['user_avatar'] = null;
+                    $_SESSION['user_avatar_updated'] = time();
                     
                     // Log activity
                     logActivity('avatar_removed', 'auth', 'User removed avatar', ['old_avatar' => $user['avatar']], ['new_avatar' => null]);
@@ -260,8 +262,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="card-body">
                                 <div class="text-center">
                                     <div class="avatar-preview mb-3">
-                                        <?php if ($user['avatar']): ?>
-                                            <img src="<?php echo htmlspecialchars($user['avatar']); ?>" alt="Avatar" class="avatar-image">
+                                        <?php 
+                                        $avatarUrl = getAvatarUrl($user['avatar'], $user['updated_at'], $user['id']);
+                                        if ($avatarUrl): ?>
+                                            <img src="<?php echo htmlspecialchars($avatarUrl); ?>" alt="Avatar" class="avatar-image">
                                         <?php else: ?>
                                             <div class="avatar-placeholder">
                                                 <i class="bi bi-person-circle"></i>

@@ -176,6 +176,117 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error = 'An error occurred while updating the user.';
                 }
             }
+        } elseif ($action === 'upload_avatar') {
+            // Handle avatar upload
+            if (!isset($_FILES['avatar']) || $_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
+                $error = 'Please select a valid image file.';
+            } else {
+                $file = $_FILES['avatar'];
+                $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                $maxSize = UPLOAD_MAX_SIZE;
+                
+                if (!in_array($file['type'], $allowedTypes)) {
+                    $error = 'Invalid file type. Only JPG, PNG, and GIF images are allowed.';
+                } elseif ($file['size'] > $maxSize) {
+                    $error = 'File size exceeds maximum limit of ' . formatFileSize($maxSize) . '.';
+                } else {
+                    // Create upload directory if it doesn't exist
+                    $uploadDir = UPLOAD_PATH . '/avatars';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    
+                    // Generate unique filename
+                    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+                    $filename = 'avatar_' . $userId . '_' . time() . '.' . $extension;
+                    $filepath = $uploadDir . '/' . $filename;
+                    
+                    // Delete old avatar
+                    if ($user['avatar'] && file_exists(APP_ROOT . '/' . $user['avatar'])) {
+                        unlink(APP_ROOT . '/' . $user['avatar']);
+                    }
+                    
+                    // Upload new file
+                    if (move_uploaded_file($file['tmp_name'], $filepath)) {
+                        // Update database
+                        $avatarPath = 'uploads/avatars/' . $filename;
+                        $stmt = $db->prepare("UPDATE users SET avatar = ?, updated_at = NOW() WHERE id = ?");
+                        $result = $stmt->execute([$avatarPath, $userId]);
+                        
+                        if ($result) {
+                            // Update session if editing own profile
+                            if ($isCurrentUser) {
+                                $_SESSION['user_avatar'] = $avatarPath;
+                                $_SESSION['user_avatar_updated'] = time();
+                            }
+                            
+                            // Log activity
+                            logActivity('avatar_changed', 'users', "Changed avatar for user ID: {$userId}", ['old_avatar' => $user['avatar']], ['new_avatar' => $avatarPath]);
+                            
+                            $success = 'Avatar updated successfully.';
+                            
+                            // Refresh user data
+                            $stmt = $db->prepare("
+                                SELECT u.*, 
+                                       GROUP_CONCAT(r.id) as role_ids
+                                FROM users u
+                                LEFT JOIN user_roles ur ON u.id = ur.user_id
+                                LEFT JOIN roles r ON ur.role_id = r.id
+                                WHERE u.id = ?
+                                GROUP BY u.id
+                            ");
+                            $stmt->execute([$userId]);
+                            $user = $stmt->fetch();
+                            $userRoleIds = $user['role_ids'] ? explode(',', $user['role_ids']) : [];
+                        } else {
+                            $error = 'Failed to update avatar in database.';
+                        }
+                    } else {
+                        $error = 'Failed to upload file. Please try again.';
+                    }
+                }
+            }
+        } elseif ($action === 'remove_avatar') {
+            // Remove avatar
+            if ($user['avatar']) {
+                // Delete file
+                if (file_exists(APP_ROOT . '/' . $user['avatar'])) {
+                    unlink(APP_ROOT . '/' . $user['avatar']);
+                }
+                
+                // Update database
+                $stmt = $db->prepare("UPDATE users SET avatar = NULL, updated_at = NOW() WHERE id = ?");
+                $result = $stmt->execute([$userId]);
+                
+                if ($result) {
+                    // Update session if editing own profile
+                    if ($isCurrentUser) {
+                        $_SESSION['user_avatar'] = null;
+                        $_SESSION['user_avatar_updated'] = time();
+                    }
+                    
+                    // Log activity
+                    logActivity('avatar_removed', 'users', "Removed avatar for user ID: {$userId}", ['old_avatar' => $user['avatar']], ['new_avatar' => null]);
+                    
+                    $success = 'Avatar removed successfully.';
+                    
+                    // Refresh user data
+                    $stmt = $db->prepare("
+                        SELECT u.*, 
+                               GROUP_CONCAT(r.id) as role_ids
+                        FROM users u
+                        LEFT JOIN user_roles ur ON u.id = ur.user_id
+                        LEFT JOIN roles r ON ur.role_id = r.id
+                        WHERE u.id = ?
+                        GROUP BY u.id
+                    ");
+                    $stmt->execute([$userId]);
+                    $user = $stmt->fetch();
+                    $userRoleIds = $user['role_ids'] ? explode(',', $user['role_ids']) : [];
+                } else {
+                    $error = 'Failed to remove avatar.';
+                }
+            }
         } elseif ($action === 'change_password') {
             $newPassword = $_POST['new_password'] ?? '';
             $confirmPassword = $_POST['confirm_password'] ?? '';
@@ -331,14 +442,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                             <div class="card-body">
                                 <div class="text-center mb-3">
-                                    <div class="user-avatar-lg mb-3">
-                                        <?php if ($user['avatar']): ?>
-                                            <img src="<?php echo htmlspecialchars($user['avatar']); ?>" alt="Avatar">
+                                    <div class="avatar-preview-lg mb-3">
+                                        <?php 
+                                        $avatarUrl = getAvatarUrl($user['avatar'], $user['updated_at'], $user['id']);
+                                        if ($avatarUrl): ?>
+                                            <img src="<?php echo htmlspecialchars($avatarUrl); ?>" alt="Avatar" class="avatar-image-lg">
                                         <?php else: ?>
-                                            <i class="bi bi-person-circle"></i>
+                                            <i class="bi bi-person-circle avatar-placeholder-lg"></i>
                                         <?php endif; ?>
                                     </div>
-                                    <p class="text-muted">Profile image upload coming soon</p>
+                                    <form method="POST" enctype="multipart/form-data" class="avatar-upload-form" id="avatarForm">
+                                        <?php echo csrfField(); ?>
+                                        <input type="hidden" name="action" value="upload_avatar">
+                                        <div class="mb-2">
+                                            <label class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-upload"></i> Upload New Avatar
+                                                <input type="file" name="avatar" id="avatarInput" accept="image/jpeg,image/jpg,image/png,image/gif" style="display: none;">
+                                            </label>
+                                        </div>
+                                        <?php if ($user['avatar']): ?>
+                                        <button type="submit" name="action" value="remove_avatar" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to remove this avatar?');">
+                                            <i class="bi bi-trash"></i> Remove Avatar
+                                        </button>
+                                        <?php endif; ?>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -434,6 +561,29 @@ document.getElementById('passwordForm').addEventListener('submit', function(e) {
     if (newPassword !== confirmPassword) {
         e.preventDefault();
         alert('Passwords do not match.');
+    }
+});
+
+// Avatar upload - auto-submit form after file selection
+document.getElementById('avatarInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.querySelector('.avatar-preview-lg');
+            if (preview.querySelector('.avatar-image-lg')) {
+                preview.querySelector('.avatar-image-lg').src = e.target.result;
+            } else {
+                preview.innerHTML = '<img src="' + e.target.result + '" alt="Avatar" class="avatar-image-lg">';
+            }
+        };
+        reader.readAsDataURL(file);
+        
+        // Auto-submit form after short delay
+        setTimeout(function() {
+            document.getElementById('avatarForm').submit();
+        }, 500);
     }
 });
 </script>

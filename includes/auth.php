@@ -30,11 +30,8 @@ function startSecureSession() {
         ]);
         session_start();
         
-        // Regenerate session ID periodically
+        // Set session creation time
         if (!isset($_SESSION['_created'])) {
-            $_SESSION['_created'] = time();
-        } else if (time() - $_SESSION['_created'] > 1800) {
-            session_regenerate_id(true);
             $_SESSION['_created'] = time();
         }
     }
@@ -60,15 +57,59 @@ function authUser() {
         return null;
     }
     
+    $avatar = $_SESSION['user_avatar'] ?? null;
+
+    if ($avatar) {
+
+        // convert relative path to absolute URL
+        if (!preg_match('#^https?://#', $avatar)) {
+            $avatar = APP_URL . '/' . ltrim($avatar, '/');
+        }
+
+        $separator = str_contains($avatar, '?') ? '&' : '?';
+        $avatar .= $separator . 'v=' . ($_SESSION['user_avatar_updated'] ?? time());
+    }
+    
     return [
         'id' => $_SESSION['user_id'],
         'uuid' => $_SESSION['user_uuid'] ?? null,
         'first_name' => $_SESSION['user_first_name'] ?? '',
         'last_name' => $_SESSION['user_last_name'] ?? '',
         'email' => $_SESSION['user_email'],
-        'avatar' => $_SESSION['user_avatar'] ?? null,
+        'avatar' => $avatar,
         'roles' => $_SESSION['user_roles'] ?? []
     ];
+}
+
+/**
+ * Get avatar URL with cache-busting timestamp
+ * 
+ * @param string|null $avatarPath The avatar path from database
+ * @param string|null $updatedAt The updated_at timestamp from database
+ * @param int|null $userId The user ID (for current user check)
+ * @return string|null Avatar URL with cache-busting parameter
+ */
+function getAvatarUrl($avatarPath, $updatedAt = null, $userId = null) {
+    if (!$avatarPath) {
+        return null;
+    }
+    
+    // If this is the current user, use session timestamp
+    if ($userId && $userId === authId()) {
+        $timestamp = $_SESSION['user_avatar_updated'] ?? time();
+        return $avatarPath . '?v=' . $timestamp;
+    }
+    
+    // For other users, use updated_at timestamp or file modification time
+    if ($updatedAt) {
+        $timestamp = strtotime($updatedAt);
+    } else {
+        // Fallback to file modification time
+        $filepath = APP_ROOT . '/' . $avatarPath;
+        $timestamp = file_exists($filepath) ? filemtime($filepath) : time();
+    }
+    
+    return $avatarPath . '?v=' . $timestamp;
 }
 
 /**
@@ -285,6 +326,7 @@ function attemptLogin($email, $password, $remember = false) {
         $_SESSION['user_last_name'] = $user['last_name'];
         $_SESSION['user_email'] = $user['email'];
         $_SESSION['user_avatar'] = $user['avatar'];
+        $_SESSION['user_avatar_updated'] = time();
         $_SESSION['user_roles'] = $user['roles'] ? explode(',', $user['roles']) : [];
         $_SESSION['user_permissions'] = $permissions;
         $_SESSION['_created'] = time();

@@ -51,9 +51,3 @@ $page_description = isset($page_description) ? $page_description : APP_NAME;
     <?php endif; ?>
 </head>
 <body>
-    <?php
-    // Start session if not already started
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-    ?>

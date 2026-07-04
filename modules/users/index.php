@@ -158,6 +158,9 @@ $stmt = $db->prepare("
 ");
 $stmt->execute(array_merge($params, [$perPage, $offset]));
 $users = $stmt->fetchAll();
+
+// Get current user ID for avatar URL generation
+$currentUserId = authId();
 ?>
 <?php require_once APP_ROOT . '/includes/header.php'; ?>
 
@@ -244,8 +247,10 @@ $users = $stmt->fetchAll();
                                                 <td>
                                                     <div class="d-flex align-items-center">
                                                         <div class="user-avatar me-3">
-                                                            <?php if ($user['avatar']): ?>
-                                                                <img src="<?php echo htmlspecialchars($user['avatar']); ?>" alt="Avatar">
+                                                            <?php 
+                                                            $avatarUrl = getAvatarUrl($user['avatar'], $user['updated_at'], $user['id']);
+                                                            if ($avatarUrl): ?>
+                                                                <img src="<?php echo htmlspecialchars($avatarUrl); ?>" alt="Avatar">
                                                             <?php else: ?>
                                                                 <i class="bi bi-person-circle"></i>
                                                             <?php endif; ?>
