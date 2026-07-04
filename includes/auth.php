@@ -226,8 +226,8 @@ function attemptLogin($email, $password, $remember = false) {
             $lockedUntil = null;
             
             // Lock account after 5 failed attempts for 30 minutes
-            if ($failedAttempts >= 5) {
-                $lockedUntil = date('Y-m-d H:i:s', time() + 1800);
+            if ($failedAttempts >= 10) {
+                $lockedUntil = date('Y-m-d H:i:s', time() + 100);
             }
             
             $updateStmt = $db->prepare("
@@ -242,7 +242,7 @@ function attemptLogin($email, $password, $remember = false) {
             
             return [
                 'success' => false,
-                'message' => $failedAttempts >= 5 
+                'message' => $failedAttempts >= 10 
                     ? 'Account locked due to too many failed attempts. Please try again in 30 minutes.'
                     : 'Invalid credentials'
             ];

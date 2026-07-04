@@ -425,48 +425,6 @@
     font-size: 0.875rem;
 }
 
-/* Form Switch */
-.form-switch {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-}
-
-.form-switch input {
-    display: none;
-}
-
-.form-switch-slider {
-    width: 50px;
-    height: 26px;
-    background: var(--gray-300);
-    border-radius: 26px;
-    position: relative;
-    transition: background var(--transition-fast);
-}
-
-.form-switch-slider::before {
-    content: '';
-    position: absolute;
-    width: 22px;
-    height: 22px;
-    background: var(--white);
-    border-radius: 50%;
-    top: 2px;
-    left: 2px;
-    transition: transform var(--transition-fast);
-    box-shadow: var(--shadow-sm);
-}
-
-.form-switch input:checked + .form-switch-slider {
-    background: var(--primary-color);
-}
-
-.form-switch input:checked + .form-switch-slider::before {
-    transform: translateX(24px);
-}
-
 /* File Upload */
 .file-upload {
     border: 2px dashed var(--gray-300);

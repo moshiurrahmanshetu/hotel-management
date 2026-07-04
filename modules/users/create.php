@@ -91,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     INSERT INTO users (uuid, first_name, last_name, email, username, password, phone, is_active, created_at, updated_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
                 ");
-                $stmt->execute([$uuid, $firstName, $lastName, $email, $username ?: null, $hashedPassword, $phone ?: null]);
+                $stmt->execute([$uuid, $firstName, $lastName, $email, $username ?: null, $hashedPassword, $phone ?: null, $isActive]);
                 
                 $userId = $db->lastInsertId();
                 

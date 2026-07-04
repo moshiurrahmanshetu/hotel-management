@@ -11,19 +11,8 @@ if (!defined('APP_ROOT')) {
     define('APP_ROOT', dirname(__DIR__));
 }
 
-// Load configuration
-require_once APP_ROOT . '/config/config.php';
-
-/**
- * Database Configuration
- */
-define('DB_HOST', env('DB_HOST', 'localhost'));
-define('DB_PORT', env('DB_PORT', '3306'));
-define('DB_NAME', env('DB_DATABASE', 'hotel_management'));
-define('DB_USER', env('DB_USERNAME', 'root'));
-define('DB_PASS', env('DB_PASSWORD', ''));
-define('DB_CHARSET', 'utf8mb4');
-define('DB_COLLATION', 'utf8mb4_unicode_ci');
+// Note: This file is loaded by config.php, so constants are already defined
+// Do NOT load config.php here to avoid circular dependency
 
 /**
  * PDO Options

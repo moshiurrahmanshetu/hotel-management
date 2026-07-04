@@ -1,32 +1,10 @@
 <?php
-/**
- * Hotel & Resort Management System
- * Helper Functions File
- * 
- * Reusable helper functions for the application
- */
 
 // Prevent direct access
 if (!defined('APP_ROOT')) {
     define('APP_ROOT', dirname(__DIR__));
 }
 
-// Note: This file should be loaded by bootstrap.php which loads config.php
-// Do NOT load bootstrap here to avoid circular dependency
-
-/**
- * Get database connection instance
- * 
- * @return PDO
- */
-function db() {
-    static $db = null;
-    if ($db === null) {
-        require_once APP_ROOT . '/config/database.php';
-        $db = getDB();
-    }
-    return $db;
-}
 
 /**
  * Redirect to a URL
@@ -61,7 +39,7 @@ function sanitize($data) {
  * @deprecated Use prepared statements instead
  */
 function escape($string) {
-    return db()->quote($string);
+    return getDB()->quote($string);
 }
 
 /**
@@ -116,37 +94,6 @@ function generateUUID() {
     $data[6] = chr(ord($data[6]) & 0x0f | 0x40); // Set version to 4
     $data[8] = chr(ord($data[8]) & 0x3f | 0x80); // Set variant to RFC 4122
     return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
-}
-
-/**
- * Get current logged-in user
- * 
- * @return array|null User data or null if not logged in
- */
-function currentUser() {
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-    return $_SESSION['user'] ?? null;
-}
-
-/**
- * Get current user ID
- * 
- * @return int|null User ID or null if not logged in
- */
-function currentUserId() {
-    $user = currentUser();
-    return $user['id'] ?? null;
-}
-
-/**
- * Check if user is logged in
- * 
- * @return bool
- */
-function isLoggedIn() {
-    return currentUser() !== null;
 }
 
 /**
@@ -279,7 +226,7 @@ function randomString($length = 32) {
  */
 function getSetting($key, $default = null) {
     try {
-        $stmt = db()->prepare("SELECT setting_value, setting_type FROM system_settings WHERE setting_key = ?");
+        $stmt = getDB()->prepare("SELECT setting_value, setting_type FROM system_settings WHERE setting_key = ?");
         $stmt->execute([$key]);
         $result = $stmt->fetch();
         
@@ -321,7 +268,7 @@ function getSetting($key, $default = null) {
  */
 function setSetting($key, $value, $type = 'string', $group = 'general', $description = null) {
     try {
-        $db = db();
+        $db = getDB();
         
         // Convert value based on type
         if (is_bool($value)) {
@@ -371,11 +318,11 @@ function setSetting($key, $value, $type = 'string', $group = 'general', $descrip
  */
 function logActivity($action, $module, $description = null, $oldValues = null, $newValues = null) {
     try {
-        $userId = currentUserId();
+        $userId = authId();
         $ipAddress = getClientIP();
         $userAgent = getUserAgent();
         
-        $stmt = db()->prepare("
+        $stmt = getDB()->prepare("
             INSERT INTO activity_logs 
             (user_id, action, module, description, ip_address, user_agent, old_values, new_values) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
