@@ -45,6 +45,12 @@ INSERT INTO `permissions` (`name`, `slug`, `module`, `description`, `created_at`
 ('Edit Rooms', 'rooms.edit', 'rooms', 'Edit room information', NOW(), NOW()),
 ('Delete Rooms', 'rooms.delete', 'rooms', 'Delete rooms', NOW(), NOW()),
 
+-- Room Types
+('View Room Types', 'room_types.view', 'room_types', 'View room type list and details', NOW(), NOW()),
+('Create Room Types', 'room_types.create', 'room_types', 'Create new room types', NOW(), NOW()),
+('Edit Room Types', 'room_types.edit', 'room_types', 'Edit room type information', NOW(), NOW()),
+('Delete Room Types', 'room_types.delete', 'room_types', 'Delete room types', NOW(), NOW()),
+
 -- Bookings
 ('View Bookings', 'bookings.view', 'bookings', 'View booking list and details', NOW(), NOW()),
 ('Create Bookings', 'bookings.create', 'bookings', 'Create new bookings', NOW(), NOW()),
@@ -82,11 +88,12 @@ SELECT 1, id FROM `permissions`;
 INSERT INTO `role_permissions` (`role_id`, `permission_id`)
 SELECT 2, id FROM `permissions` WHERE slug NOT IN ('roles.delete');
 
--- Manager: Dashboard, Rooms, Bookings, Guests, Reports (view only)
+-- Manager: Dashboard, Rooms, Room Types, Bookings, Guests, Reports (view only)
 INSERT INTO `role_permissions` (`role_id`, `permission_id`)
 SELECT 3, id FROM `permissions` WHERE slug IN (
     'dashboard.view',
     'rooms.view', 'rooms.create', 'rooms.edit',
+    'room_types.view', 'room_types.create', 'room_types.edit',
     'bookings.view', 'bookings.create', 'bookings.edit', 'bookings.checkin', 'bookings.checkout',
     'guests.view', 'guests.create', 'guests.edit',
     'reports.view'

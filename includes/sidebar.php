@@ -142,6 +142,13 @@ $userRole = $currentUser && !empty($currentUser['roles']) ? ucfirst(str_replace(
                 </a>
             </li>
             
+            <li class="nav-item">
+                <a class="nav-link" href="<?php echo APP_URL; ?>/modules/room-types/index.php" data-page="room-types">
+                    <i class="bi bi-grid-3x3"></i>
+                    <span>Room Types</span>
+                </a>
+            </li>
+            
             <li class="nav-item has-submenu">
                 <a class="nav-link submenu-toggle" href="javascript:void(0)">
                     <i class="bi bi-currency-dollar"></i>
